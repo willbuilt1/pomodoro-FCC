@@ -1,0 +1,32 @@
+:root{
+  font-size: 0.625;
+}
+
+#app {
+  width: 300px;
+  text-align: center;
+}
+
+.flex{
+  display: flex;
+}
+
+.session{
+  width: 20rem;
+  justify-content: space-between;
+
+  &__section{
+    width: 50%;
+    text-align: center;
+  }
+
+  &__display{
+    width: 5rem;
+    margin: 0 auto;
+    justify-content: space-around;
+  }
+}
+
+.display{
+  text-align: center;
+}
