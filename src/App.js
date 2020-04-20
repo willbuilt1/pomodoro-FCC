@@ -1,26 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect} from 'react';
 import './App.scss';
-
-
-function useInterval(callback, delay) {
-  const savedCallback = useRef();
-
-  // Remember the latest callback.
-  useEffect(() => {
-    savedCallback.current = callback;
-  }, [callback]);
-
-  // Set up the interval.
-  useEffect(() => {
-    function tick() {
-      savedCallback.current();
-    }
-    if (delay !== null) {
-      let id = setInterval(tick, delay);
-      return () => clearInterval(id);
-    }
-  }, [delay]);
-}
 
 function App() {
   
@@ -31,18 +10,28 @@ function App() {
   const [timerLength,setTimerLength] = useState(1);
   const [breakLength,setBreakLength] = useState(5);
   const [total, setTotal] = useState(timerLength*60);
-  const [minutes, setMinutes] = useState(displayMinutes(total));
-  const [seconds, setSeconds] = useState(displaySeconds(total));
   const [running, setRunning] = useState(false);
   const [type, setType] = useState("Session");
 
+  const timerLogic = () => {
+    if (type === "Session" && total === 0){
+      setType("Break");
+      setTotal(breakLength * 60)
+    } else if (type === "Break" && total === 0){
+      setType("Session");
+      setTotal(timerLength * 60)
+    }
+  }
+
 
   const runTimer = () => {
-     let time = total - 1
-    
-      setTotal(time)
-      setMinutes(displayMinutes(time))
-      setSeconds(displaySeconds(time))
+    setTotal(total - 1)
+  }
+
+  const clockDisplay = time => {
+    let min = displayMinutes(time)
+    let sec = displaySeconds(time)
+    return `${min}:${sec}`
   }
 
   function checkTime(i) {
@@ -55,21 +44,24 @@ function App() {
   useEffect(()=>{
     let interval = null;
     if (running) {
+      timerLogic()
       interval = setInterval(() => {
         runTimer()
-      }, 1000);
-    } else if (!running && seconds !== 0) {
+      }, 10);
+    } else if (!running) {
       clearInterval(interval);
     }
     return () => clearInterval(interval);
-  }, [running, seconds])
+    // eslint-disable-next-line
+  }, [running, total])
 
   const startStop = () => {
     setRunning(!running)
   }
 
   const reset =() => {
-    setTotal(timerLength*60)
+    setTotal(timerLength*60);
+    setRunning(false)
   }
   
   
@@ -98,7 +90,8 @@ function App() {
           </div>
       </div>
           <div className="display">
-              <h1>{minutes}:{seconds}</h1>
+              <h3>{type}</h3>
+              <h1>{clockDisplay(total)}</h1>
           </div>
           <button onClick={startStop}>Start/Stop</button>
           <button onClick={reset}>Reset</button>
